@@ -9,17 +9,6 @@ import authorizeAdmin from '../middlewares/authorizeAdmin.js';
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
 
-const parseId = (rawId) => {
-  if (typeof rawId !== 'string' || !/^\d+$/.test(rawId)) {
-    return null;
-  }
-  const id = Number(rawId);
-  if (id <= 0 || !Number.isSafeInteger(id)) {
-    return null;
-  }
-  return id;
-};
-
 const router = express.Router(); // создаёт отдельный роутер для маршрутов, связанных с User
 
 router.get('/', async (req, res, next) => {
