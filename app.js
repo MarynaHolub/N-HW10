@@ -22,17 +22,32 @@ app.use((error, req, res, next) => {
   });
 });
 
+app.get('/', (req,res)=>{
+  res.send('Home page')
+})
+
 const start = async () => {
-  try {
-    app.listen(PORT, async () => {
-      // await User.sync({ force: true });
-      await sequelize.authenticate();
-      console.log('Connection to the database has been successfully');
-      console.log(`Server running at the http://localhost:${PORT}`);
+   try {
+    // сначала проверяем подключение к базе
+    await sequelize.authenticate();
+    console.log('Connection to the database has been established successfully');
+
+    // и только потом запускаем сервер
+    app.listen(PORT, () => {
+      console.log(`Server running at http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error('Unable to connect to the database', error.message);
+    console.error('Unable to connect to the database:', error.message);
+    process.exitCode = 1;
   }
 };
 
 start();
+
+
+// генерация seeders
+// npx sequelize-cli migration:generate --name create-users
+// npx sequelize-cli seed:generate --name admin-user
+// Запуск:
+// npx sequelize-cli db:migrate
+// npx sequelize-cli db:seed:all

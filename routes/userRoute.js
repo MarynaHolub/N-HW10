@@ -11,7 +11,7 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
 
 const router = express.Router(); // создаёт отдельный роутер для маршрутов, связанных с User
 
-router.get('/', async (req, res, next) => {
+router.get('/', authenticate, authorizeAdmin, async (req, res, next) => {
   try {
     const users = await User.findAll({
       attributes: { exclude: ['password'] },
@@ -250,30 +250,34 @@ router.delete('/delete-account', authenticate, async (req, res, next) => {
 });
 
 router.patch(
-  '/:id/update-role',
+  '/update-role',
   authenticate,
   authorizeAdmin,
   async (req, res, next) => {
     // authenticate - авторизация
     try {
-      const { newRole } = req.body ?? {};
+      const { userId, newRole } = req.body ?? {};
 
       // 1. Проверяем входные данные
-      if (typeof newRole !== 'string' || !newRole.trim()) {
+      const id = Number(userId);
+
+      if (!Number.isInteger(id) || id <= 0) {
         return res.status(400).json({
-          message: 'Укажите новую роль',
+          message: 'Укажите корректный userId',
         });
       }
 
+      const role = typeof newRole === 'string' ? newRole.trim() : '';
+
       const allowedRoles = ['user', 'admin'];
 
-      if (!allowedRoles.includes(newRole.trim())) {
+      if (!allowedRoles.includes(role.trim())) {
         return res.status(400).json({
           message: 'Недопустимая роль',
         });
       }
 
-      const user = await User.findByPk(req.params.id);
+      const user = await User.findByPk(id);
 
       if (!user) {
         return res.status(404).json({
@@ -281,19 +285,25 @@ router.patch(
         });
       }
 
+      // в базу пишем уже очищенное значение
       await user.update({
-        role: newRole,
+        role: role,
       });
 
       res.json({
-        message: 'Role успешно изменён',
+        message: 'Роль успешно изменена',
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+        },
       });
     } catch (error) {
       next(error);
     }
   },
 );
-
 
 router.post('/refresh-token', authenticate, async (req, res, next) => {
   try {
@@ -328,6 +338,5 @@ router.post('/refresh-token', authenticate, async (req, res, next) => {
     next(error);
   }
 });
-
 
 export default router;

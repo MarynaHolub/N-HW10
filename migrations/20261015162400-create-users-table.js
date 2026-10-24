@@ -1,7 +1,9 @@
 'use strict';
 
 /** @type {import('sequelize-cli').Migration} */
-module.exports = {
+
+// module.exports = {   // если оставить так, то надо расширение файла .cjs
+export default {
   async up(queryInterface, Sequelize) {
     /**
      * Add altering commands here.
@@ -70,3 +72,9 @@ module.exports = {
     await queryInterface.dropTable('users');
   },
 };
+
+// генерация 
+// npx sequelize-cli migration:generate --name create-users
+
+// Запуск:
+// npx sequelize-cli db:migrate
