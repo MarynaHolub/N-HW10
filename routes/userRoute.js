@@ -57,7 +57,6 @@ router.post('/register', async (req, res, next) => {
       username: username.trim(),
       email: normalizedEmail,
       password: hashedPassword,
-      role: 'admin',
     });
 
     res.status(201).json({
@@ -97,10 +96,6 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // console.log('password:', typeof password);
-    // console.log('existingUser.password:', typeof existingUser.password);
-    // console.log('Хэш пароля:', existingUser.password);
-
     // Сравним введённый пароль с хэшированным паролем в массиве
     const isMatch = await bcrypt.compare(password, existingUser.password);
 
@@ -135,8 +130,27 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/profile', authenticate, (req, res) => {
-  res.json({ message: 'Профиль пользователя' });
+router.get('/profile', authenticate, async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id, {
+      attributes: { exclude: ['password'] },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: 'Пользователь не найден',
+      });
+    }
+
+    res.json({
+      message: 'Профиль пользователя',
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Ошибка получения профиля',
+    });
+  }
 });
 
 // Изменение email

@@ -45,7 +45,7 @@ export default {
           defaultValue: 'user',
         },
         mustChangePassword: {
-          type: DataTypes.BOOLEAN,
+          type: Sequelize.BOOLEAN,
           allowNull: false,
           defaultValue: false,
         },
@@ -73,7 +73,7 @@ export default {
   },
 };
 
-// генерация 
+// генерация
 // npx sequelize-cli migration:generate --name create-users
 
 // Запуск:

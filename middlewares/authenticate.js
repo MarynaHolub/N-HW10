@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 
+// 1. Проверяет JWT, заполняет req.user
 const authenticate = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;  // получает заголовок Authorization в нем хранится токен
